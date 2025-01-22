@@ -2,13 +2,41 @@ from scapy.all import *
 from scapy.all import IP, ICMP, TCP
 
 # ICMP Ping
+def ipValidation(ip_address):
+    parts = ip_address.split(".")
+    if len(parts) != 4:
+        return False
+    for part in parts:
+        if not part.isdigit():
+            return False
+        numVal = int(part)
+        if part < 0 or part > 255:
+            return False
 
-packet = IP(dst = "8.8.8.8")
-ans, unans = sr(packet/ICMP()/TCP(dport=80,flags="S"), timeout=3)
 
-if (ans):
-    response = sr1(packet/TCP(dport=80, flags="S"))
+def Ping(ip_address):
+    packet = IP(dst = ip_address)
+    ans, unans = sr(packet/ICMP(), timeout=3)
+    if ans:
+        print(ans)
+        print("Scanning ports: 0-1000")
+        port = range(0,1000)
+        while(port in port):
+            response = sr1(packet/TCP(dport = port, flags="S"))
+            print(response)
+    else:
+        print(unans)
 
-# Sending packet
+        
+def main():
+    ip_address = input("Enter the IP address to scan: ")
+    if ipValidation(ip_address):
+        confimation = input("Continue with ping of network? Y/N")
+        if confimation == "Y" or "y":
+            Ping(ip_address)
+        else:
+            sys.exit()
 
-# Print results
+
+if __name__ == "__main__":
+    main()
