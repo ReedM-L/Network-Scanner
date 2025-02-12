@@ -15,22 +15,33 @@ def ipValidation(ip_address):
             return False
     return True
 
-
 def Ping(ip_address):
-    with open("results.txt", "w") as f:
-        packet = IP(dst = ip_address)
-        ans, unans = sr(packet/ICMP(), timeout=3)
-        if ans:
-            f.write(ans)
-            print("Scanning ports: 0-1000")
-            port = range(0,1000)
-            for current_port in port:
-                response = sr(packet/TCP(dport = current_port, flags="S"))
-                f.write(str(current_port)+ ": " + str(response))
-        else:
-            print(unans)
+    try:
+        with open("results.txt", "w") as f:
+            packet = IP(dst = ip_address)
+            ans, unans = sr(packet/ICMP(), timeout=3)
+            responseList = []
+            norespList = []
+            if ans:
+                print(ans.summary())
+                print("Scanning ports: 0-1000")
+                port = range(0,1000)
+                for current_port in port:
+                    resp, noResp = sr(packet/TCP(dport = current_port, flags="S",timeout=2))
+                    responseList.append(resp)
+                    norespList.append(noResp)
+            else:
+                print(unans)
+    except FileNotFoundError:
+        print("Error: File not found.")
+    except PermissionError:
+        print("Error: You do not have permission to access this file.")
+    except Exception as e:
+        print(f"Unexpected error has occured: {e}")
+    finally:
+        f.close()
+        
     
-
         
 def main():
     ip_address = input("Enter the IP address to scan: ")
